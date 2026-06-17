@@ -7,32 +7,6 @@
 #include "include/AdaptiveSequence.h"
 #include "include/BitSequence.h"
 
-/*
-int sampleIntMapFunc(int x) {
-    return x * 2;
-}
-
-int sampleFloatMapFunc(float x) {
-    return x * 1.5;
-}
-
-bool sampleIntWhereFunc(int x) {
-    return x > 3;
-}
-
-bool sampleFloatWhereFunc(float x) {
-    return x > 3.5;
-}
-
-int sampleIntReduceFunc(int x, int y) {
-    return x + y;
-}
-
-int sampleFloatReduceFunc(float x, float y) {
-    return x + y;
-}
-*/
-
 template <class T> void testGetFirst(short* testNum, Sequence<T>* seq, T expected) {
     try {
         T result = seq->GetFirst();
@@ -272,31 +246,32 @@ template <class T> void testSwitchMode(short* testNum, AdaptiveSequence<T>* seq)
 void testAnd(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     BitSequence* result;
     try {
-        BitSequence* result = seq1->And(*seq2);
+        result = seq1->And(*seq2);
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-            seq2->GetLength() << ", error\n";
+            seq2->GetLength() << ", error in And\n";
         return;
     }
 
     int size = result->GetLength(), expectedSize = seq1->GetLength();
     if (size != expectedSize) {
         std::cout << "Test " << *testNum << " failed: expected size " << expectedSize << ", got " << \
-            size << "\n";
+            size << " in And\n";
         delete result;
         return;
     }
     int index = 0;
     bool valid = true;
+    bool val1, val2;
     for (; index < size && valid; index++) {
-        valid = seq1->Get(index) && seq2->Get(index) == result->Get(index);
+        valid = (seq1->Get(index) && seq2->Get(index)) == result->Get(index);
     }
     if (valid) {
         std::cout << "Test " << *testNum << " passed\n";
     } else {
         std::cout << "Test " << *testNum << " failed: element number " << index << " expected " << \
             std::to_string(seq1->Get(index) && seq2->Get(index)) << ", got " << result->Get(index) << \
-            "\n";
+            " in And\n";
     }
     delete result;
     *testNum += 1;
@@ -307,7 +282,7 @@ void testAndIndexError(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     try {
         result = seq1->And(*seq2);
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-            seq2->GetLength() << ", error not raised\n";
+            seq2->GetLength() << ", error not raised in And\n";
         delete result;
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " passed\n";
@@ -318,31 +293,31 @@ void testAndIndexError(short* testNum, BitSequence* seq1, BitSequence* seq2) {
 void testOr(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     BitSequence* result;
     try {
-        BitSequence* result = seq1->Or(*seq2);
+        result = seq1->Or(*seq2);
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-                                                                                                 seq2->GetLength() << ", error\n";
+            seq2->GetLength() << ", error in Or\n";
         return;
     }
 
     int size = result->GetLength(), expectedSize = seq1->GetLength();
     if (size != expectedSize) {
         std::cout << "Test " << *testNum << " failed: expected size " << expectedSize << ", got " << \
-            size << "\n";
+            size << " in Or\n";
         delete result;
         return;
     }
     int index = 0;
     bool valid = true;
     for (; index < size && valid; index++) {
-        valid = seq1->Get(index) || seq2->Get(index) == result->Get(index);
+        valid = (seq1->Get(index) || seq2->Get(index)) == result->Get(index);
     }
     if (valid) {
         std::cout << "Test " << *testNum << " passed\n";
     } else {
         std::cout << "Test " << *testNum << " failed: element number " << index << " expected " << \
             std::to_string(seq1->Get(index) || seq2->Get(index)) << ", got " << result->Get(index) << \
-            "\n";
+            " in Or\n";
     }
     delete result;
     *testNum += 1;
@@ -353,7 +328,7 @@ void testOrIndexError(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     try {
         result = seq1->Or(*seq2);
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-            seq2->GetLength() << ", error not raised\n";
+            seq2->GetLength() << ", error not raised in Or\n";
         delete result;
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " passed\n";
@@ -364,24 +339,24 @@ void testOrIndexError(short* testNum, BitSequence* seq1, BitSequence* seq2) {
 void testXor(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     BitSequence* result;
     try {
-        BitSequence* result = seq1->Xor(*seq2);
+        result = seq1->Xor(*seq2);
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-                                                                                                 seq2->GetLength() << ", error\n";
+            seq2->GetLength() << ", error in Xor\n";
         return;
     }
 
     int size = result->GetLength(), expectedSize = seq1->GetLength();
     if (size != expectedSize) {
         std::cout << "Test " << *testNum << " failed: expected size " << expectedSize << ", got " << \
-            size << "\n";
+            size << " in Xor\n";
         delete result;
         return;
     }
     int index = 0;
     bool valid = true;
     for (; index < size && valid; index++) {
-        valid = !(seq1->Get(index) && seq2->Get(index)) && (seq1->Get(index) || seq2->Get(index)) \
+        valid = (!(seq1->Get(index) && seq2->Get(index)) && (seq1->Get(index) || seq2->Get(index))) \
                                                                == result->Get(index);
     }
     if (valid) {
@@ -389,7 +364,7 @@ void testXor(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     } else {
         std::cout << "Test " << *testNum << " failed: element number " << index << " expected " << \
         std::to_string(!(seq1->Get(index) && seq2->Get(index)) && (seq1->Get(index) || seq2->Get(index))) \
-        << ", got " << result->Get(index) << "\n";
+        << ", got " << result->Get(index) << " in Xor\n";
     }
     delete result;
     *testNum += 1;
@@ -400,7 +375,7 @@ void testXorIndexError(short* testNum, BitSequence* seq1, BitSequence* seq2) {
     try {
         result = seq1->Xor(*seq2);
         std::cout << "Test " << *testNum << " failed: sizes " << seq1->GetLength() << " and " << \
-            seq2->GetLength() << ", error not raised\n";
+            seq2->GetLength() << ", error not raised in Xor\n";
         delete result;
     } catch (ErrorCode error) {
         std::cout << "Test " << *testNum << " passed\n";
@@ -413,7 +388,7 @@ void testNot(short* testNum, BitSequence* seq) {
     int size = seq->GetLength(), resultSize = result->GetLength();
     if (size != resultSize) {
         std::cout << "Test " << *testNum << " failed: expected size " << size << ", got" << resultSize \
-                  << "\n";
+                  << " in Not\n";
         delete result;
         return;
     }
@@ -426,12 +401,13 @@ void testNot(short* testNum, BitSequence* seq) {
         std::cout << "Test " << *testNum << " passed\n";
     } else {
         std::cout << "Test " << *testNum << " failed: element number " << index << " expected " << \
-            !(seq->Get(index)) << ", got " << result->Get(index) << "\n";
+            !(seq->Get(index)) << ", got " << result->Get(index) << " in Not\n";
     }
     *testNum += 1;
 }
 
 void runAllTests() {
+    std::cout << "runAllTests() launched\n";
     short testNum = 1;
     short* testNumAddress = &testNum;
     int baseArray[] = {1, 2, 3};
@@ -519,10 +495,10 @@ void runAllTests() {
     testConcat(testNumAddress, intList, intAdaptive);
     testConcat(testNumAddress, intArray, intAdaptive);
 
-    // If everything's right, bitSeq is now 010101
-    bool bitMaskArray[] = {false, false, false, true, true, true};
+    // If everything's right, bitSeq is now 0101010
+    bool bitMaskArray[] = {false, false, false, true, true, true, true};
     bool bitMaskArrayIndexError[] = {true};
-    BitSequence* bitMask = new BitSequence(bitMaskArray, 6);
+    BitSequence* bitMask = new BitSequence(bitMaskArray, 7);
     BitSequence* bitMaskIndexError = new BitSequence(bitMaskArrayIndexError, 1);
 
     testAnd(testNumAddress, bitSeq, bitMask);

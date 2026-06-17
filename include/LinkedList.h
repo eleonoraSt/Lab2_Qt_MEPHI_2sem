@@ -125,6 +125,7 @@ template <class T> class LinkedList {
                 return;
             }
             Node<T>* prev = head;
+            if (prev == nullptr) throw INDEX_ERROR;
             for (int current = 0; current < index - 1; current++) {
                 if (prev == nullptr) throw INDEX_ERROR;  // передан индекс больше размера списка
                 prev = prev->GetNext();

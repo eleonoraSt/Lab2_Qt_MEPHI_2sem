@@ -6,10 +6,9 @@
 
 class BitSequence: public Sequence<bool> {
 private:
-    DynamicArray<char>* seq;  // Один char - 8 бит
-    int length;  // Поскольку выделено памяти всегда на количество, кратное 8
+    DynamicArray<bool>* seq;
 public:
-    BitSequence(const bool* bitString, int count);
+    BitSequence(const bool* bits, int count);
     BitSequence();
     BitSequence(const BitSequence &other);
     ~BitSequence();

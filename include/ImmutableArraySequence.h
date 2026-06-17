@@ -54,16 +54,16 @@ template <class T> class ImmutableArraySequence: public Sequence<T> {
         }
 
         ImmutableArraySequence<T>* Append(T item) override {
-            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>();
+            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*this);
             result->seq->Resize(seq->GetSize() + 1);
-            result->seq->Set(seq->GetSize() - 1, item);
+            result->seq->Set(seq->GetSize(), item);
             return result;
         }
 
         ImmutableArraySequence<T>* Prepend(T item) override {
-            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>();
+            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*this);
             result->seq->Resize(seq->GetSize() + 1);
-            for (int index = seq->GetSize() - 1; index >= 0; index--) {
+            for (int index = seq->GetSize(); index > 0; index--) {
                 result->seq->Set(index, seq->Get(index - 1));
             }
             result->seq->Set(0, item);
@@ -71,24 +71,24 @@ template <class T> class ImmutableArraySequence: public Sequence<T> {
         }
 
         ImmutableArraySequence<T>* InsertAt(T item, int index) override {
-            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>();
+            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*this);
             result->seq->Resize(seq->GetSize() + 1);
-            for (int current = seq->GetSize() - 1; current >= index; current--) {
+            for (int current = seq->GetSize(); current >= index; current--) {
                 result->seq->Set(current, seq->Get(current - 1));
             }
             result->seq->Set(index, item);
-            return this;
+            return result;
         }
 
         ImmutableArraySequence<T>* Concat(Sequence<T>* list) override {
-            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>();
+            ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*this);
             int size = seq->GetSize();
             int otherSize = list->GetLength();
             result->seq->Resize(seq->GetSize() + otherSize);
             for (int index = 0; index < otherSize; index++) {
                 result->seq->Set(size + index, list->Get(index));
             }
-            return this;
+            return result;
         }
 
         ImmutableArraySequence<T>* Map(T (*func)(T)) const override {

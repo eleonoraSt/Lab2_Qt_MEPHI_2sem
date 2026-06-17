@@ -5,25 +5,19 @@
 
 #define BYTE_LEN 8
 
-BitSequence::BitSequence(const bool* bitString, int count) {
-    int arraySize = count / BYTE_LEN;
-    if (count % BYTE_LEN != 0) arraySize++;
-    seq = new DynamicArray<char>(arraySize);
-    length = 0;  // Append увеличивает length
+BitSequence::BitSequence(const bool* bits, int count) {
+    seq = new DynamicArray<bool>(count);
     for (int index = 0; index < count; index++) {
-        Append(bitString[index]);
-        std::cout << Get(index);
+        seq->Set(index, bits[index]);
     }
 }
 
 BitSequence::BitSequence() {
-    seq = new DynamicArray<char>(0);
-    length = 0;
+    seq = new DynamicArray<bool>(0);
 }
 
 BitSequence::BitSequence(const BitSequence &other) {
-    seq = new DynamicArray<char>(*other.seq);
-    length = other.length;
+    seq = new DynamicArray<bool>(*other.seq);
 }
 
 BitSequence::~BitSequence() {
@@ -31,268 +25,132 @@ BitSequence::~BitSequence() {
 }
 
 bool BitSequence::GetFirst() const {
-    char mask = 0b10000000;
-    std::cout << (short)(seq->Get(0)) << "\n";
-    return (bool)(seq->Get(0) & mask);
+    return seq->Get(0);
 }
 
 bool BitSequence::GetLast() const {
-    int bytesLength = length / BYTE_LEN;
-    char mask = 0b00000001;
-    if (length % BYTE_LEN != 0) {
-        bytesLength++;
-        mask <<= (BYTE_LEN - length % BYTE_LEN);
-    }
-    return (bool)(seq->Get(bytesLength - 1) & mask);
+    return seq->Get(seq->GetSize() - 1);
 }
 
 bool BitSequence::Get(int index) const {
-    if (index < 0 || index >= length) throw INDEX_ERROR;
-    char mask = 0b00000001;
-    if (index % BYTE_LEN != 0) {
-        mask <<= (BYTE_LEN - length % BYTE_LEN);
-    }
-    return (bool)(seq->Get(index / BYTE_LEN) & mask);
+    return seq->Get(index);
 }
 
 BitSequence* BitSequence::GetSubsequence(int startIndex, int endIndex) const {
-    if (startIndex < 0 || endIndex > length || endIndex < startIndex) throw INDEX_ERROR;
+    if (startIndex < 0 || endIndex > seq->GetSize() || endIndex < startIndex) throw INDEX_ERROR;
     BitSequence* subseq = new BitSequence();
-    char mask = 0b10000000 >> (startIndex % BYTE_LEN);
-    char byte = seq->Get(startIndex / BYTE_LEN);
-    bool item;
+    subseq->seq->Resize(endIndex - startIndex + 1);
     for (int index = startIndex; index <= endIndex; index++) {
-        if (index % BYTE_LEN == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        std::cout << "mask: " << (mask == 0b01000000) << "\n";
-        item = byte & mask;
-        std::cout << item;
-        subseq->Append(item);
-        mask >>= 1;
-    }
-    for (int index = 0; index <= endIndex - startIndex; index++) {
-        std::cout << subseq->Get(index);
+        subseq->seq->Set(index - startIndex, seq->Get(index));
     }
     return subseq;
 }
 
 int BitSequence::GetLength() const {
-    return length;
+    return seq->GetSize();
 }
 
 BitSequence* BitSequence::Append(bool item) {
-    int byteIndex = length / BYTE_LEN;
-    char setByte;
-    char mask = 0b10000000;
-    mask >>= length % BYTE_LEN;
-    if (!item) mask = ~mask;  // 10000000 -> 01111111 и т.д.
-    if (length % BYTE_LEN == 0) {
-        seq->Resize(byteIndex + 1);
-    }
-    setByte = item ? seq->Get(byteIndex) | mask : seq->Get(byteIndex) & mask;
-    seq->Set(byteIndex, setByte);
-    length++;
+    int oldSize = seq->GetSize();
+    seq->Resize(oldSize + 1);
+    seq->Set(oldSize, item);
     return this;
 }
 
 BitSequence* BitSequence::Prepend(bool item) {
-    int lastByte = length / BYTE_LEN;
-    char byte;
-    if (length % BYTE_LEN == 0) {
-        seq->Resize(length / BYTE_LEN + 1);
-    } else {
-        lastByte++;
+    int oldSize = seq->GetSize();
+    seq->Resize(oldSize + 1);
+    for (int index = oldSize; index < 0; index--) {
+        seq->Set(index, seq->Get(index - 1));
     }
-    length++;
-    for (int byteIndex = lastByte; byteIndex > 0; byteIndex--) {
-        byte = seq->Get(byteIndex);
-        byte = byte >> 1;
-        if (seq->Get(byteIndex - 1) & 0b00000001) {
-            byte |= 0b10000000;
-        } else {
-            byte &= 0b01111111;
-        }
-        seq->Set(byteIndex, byte);
-    }
-    byte = seq->Get(0);
-    byte = byte >> 1;
-    byte = item ? byte | 0b10000000 : byte & 0b01111111;
-    seq->Set(0, byte);
+    seq->Set(0, item);
     return this;
 }
 
 BitSequence* BitSequence::InsertAt(bool item, int index) {
-    if (index < 0 || index > length + 1) throw INDEX_ERROR;
-    int lastByte = length / BYTE_LEN;
-    int insertByte = index / BYTE_LEN;
-    char byte;
-    char trueMask = 0b00000001, falseMask = 0b11111110;
-    if (length % BYTE_LEN == 0) {
-        seq->Resize(length / BYTE_LEN + 1);
-    } else {
-        lastByte++;
+    int oldSize = seq->GetSize();
+    seq->Resize(oldSize + 1);
+    for (int indexSeq = oldSize; indexSeq < index; indexSeq--) {
+        seq->Set(indexSeq, seq->Get(indexSeq - 1));
     }
-    length++;
-    for (int byteIndex = lastByte; index > insertByte; index--) {
-        byte = seq->Get(byteIndex);
-        byte = byte >> 1;
-        if (seq->Get(byteIndex - 1) & 0b00000001) {
-            byte |= 0b10000000;
-        } else {
-            byte &= 0b01111111;
-        }
-        seq->Set(byteIndex, byte);
-    }
-    byte = seq->Get(insertByte);
-    for (int bitIndex = BYTE_LEN - 1; bitIndex > index % BYTE_LEN; bitIndex++) {
-        if (byte & (trueMask << 1)) {
-            byte |= trueMask;
-        } else {
-            byte &= falseMask;
-        }
-        trueMask = trueMask << 1;
-        falseMask = falseMask << 1;
-    }
-    byte = item ? byte | trueMask : byte & falseMask;
-    seq->Set(insertByte, byte);
+    seq->Set(index, item);
     return this;
 }
 
 BitSequence* BitSequence::Concat(Sequence<bool>* list) {
-    char mask = 0b10000000;
-    char byte;
-    bool item;
-    for (int index = 0; index < list->GetLength(); index++) {
-        if (index % BYTE_LEN == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        item = byte & mask;
-        this->Append(item);
-        mask >>= 1;
+    int otherSize = list->GetLength();
+    seq->Resize(seq->GetSize() + otherSize);
+    for (int index = 0; index < otherSize; index++) {
+        seq->Set(index + seq->GetSize(), list->Get(index));
     }
     return this;
 }
 
 BitSequence* BitSequence::Map(bool (*func)(bool)) const {
     BitSequence* mapped = new BitSequence();
-    char mask = 0b10000000;
-    char byte;
-    bool item;
-    for (int index = 0; index < length; index++) {
-        if (index % BYTE_LEN == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        item = byte & mask;
-        mapped->Append(func(item));
-        mask >>= 1;
+    mapped->seq->Resize(seq->GetSize());
+    for (int index = 0; index < seq->GetSize(); index++) {
+        mapped->seq->Set(index, func(seq->Get(index)));
     }
     return mapped;
 }
 
 BitSequence* BitSequence::Where(bool (*func)(bool)) const {
     BitSequence* filtered = new BitSequence();
-    char mask = 0b10000000;
-    char byte;
     bool item;
-    for (int index = 0; index < length; index++) {
-        if (index % BYTE_LEN == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
+    for (int index = 0; index < seq->GetSize(); index++) {
+        item = seq->Get(index);
+        if (func(item)) {
+            filtered->Append(item);
         }
-        item = byte & mask;
-        if (func(item)) filtered->Append(item);
-        mask >>= 1;
     }
     return filtered;
 }
 
 bool BitSequence::Reduce(bool (*func)(bool, bool), bool initial) const {
-    char mask = 0b10000000;
-    char byte;
-    bool item;
     bool result = initial;
-    for (int index = 0; index < length; index++) {
-        if ((index & BYTE_LEN) == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        item = byte & mask;
-        result = func(item, result);
-        mask >>= 1;
+    for (int index = 0; index < seq->GetSize(); index++) {
+        result = func(seq->Get(index), result);
     }
     return result;
 }
 
 BitSequence* BitSequence::And(const BitSequence &other) const {
-    if (length != other.length) throw INDEX_ERROR;
-    BitSequence* result = new BitSequence();
-    char byte1, byte2, byteRes;
-    char mask = 0b10000000;
-    for (int index = 0; index < length; index++) {
-        if ((index & BYTE_LEN) == 0) {
-            byte1 = seq->Get(index / BYTE_LEN);
-            byte2 = other.seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        byteRes = byte1 & byte2 & mask;  // Selected bit is AND of the bytes, others =0
-        result->Append((bool)byteRes);
-        mask >>= 1;
+    if (seq->GetSize() != other.seq->GetSize()) throw INDEX_ERROR;
+    BitSequence* result = new BitSequence;
+    result->seq->Resize(seq->GetSize());
+    for (int index = 0; index < seq->GetSize(); index++) {
+        result->seq->Set(index, seq->Get(index) && other.Get(index));
     }
     return result;
 }
 
 BitSequence* BitSequence::Or(const BitSequence &other) const {
-    if (length != other.length) throw INDEX_ERROR;
-    BitSequence* result = new BitSequence();
-    char byte1, byte2, byteRes;
-    char mask = 0b10000000;
-    for (int index = 0; index < length; index++) {
-        if ((index & BYTE_LEN) == 0) {
-            byte1 = seq->Get(index / BYTE_LEN);
-            byte2 = other.seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        byteRes = (byte1 | byte2) & mask;  // Selected bit is OR of the bytes, others =0
-        result->Append((bool)byteRes);
-        mask >>= 1;
+    if (seq->GetSize() != other.seq->GetSize()) throw INDEX_ERROR;
+    BitSequence* result = new BitSequence;
+    result->seq->Resize(seq->GetSize());
+    for (int index = 0; index < seq->GetSize(); index++) {
+        result->seq->Set(index, seq->Get(index) || other.Get(index));
     }
     return result;
 }
 
 BitSequence* BitSequence::Xor(const BitSequence &other) const {
-    if (length != other.length) throw INDEX_ERROR;
-    BitSequence* result = new BitSequence();
-    char byte1, byte2, byteRes;
-    char mask = 0b10000000;
-    for (int index = 0; index < length; index++) {
-        if ((index & BYTE_LEN) == 0) {
-            byte1 = seq->Get(index / BYTE_LEN);
-            byte2 = other.seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        byteRes = (byte1 ^ byte2) & mask;  // Selected bit is XOR of the bytes, others =0
-        result->Append((bool)byteRes);
-        mask >>= 1;
+    if (seq->GetSize() != other.seq->GetSize()) throw INDEX_ERROR;
+    BitSequence* result = new BitSequence;
+    result->seq->Resize(seq->GetSize());
+    for (int index = 0; index < seq->GetSize(); index++) {
+        result->seq->Set(index, (seq->Get(index) || other.Get(index)) && \
+            !(seq->Get(index) && other.Get(index)));
     }
     return result;
 }
 
 BitSequence* BitSequence::Not() const {
-    BitSequence* result = new BitSequence();
-    char byte, byteRes;
-    char mask = 0b10000000;
-    for (int index = 0; index < length; index++) {
-        if ((index & BYTE_LEN) == 0) {
-            byte = seq->Get(index / BYTE_LEN);
-            mask = 0b10000000;
-        }
-        byteRes = (byte ^ mask) & mask;  // Selected bit is NOT of the byte, others =0
-        result->Append((bool)byteRes);
-        mask >>= 1;
+    BitSequence* result = new BitSequence;
+    result->seq->Resize(seq->GetSize());
+    for (int index = 0; index < seq->GetSize(); index++) {
+        result->seq->Set(index, !(seq->Get(index)));
     }
     return result;
 }
