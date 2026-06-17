@@ -407,7 +407,6 @@ void testNot(short* testNum, BitSequence* seq) {
 }
 
 void runAllTests() {
-    std::cout << "runAllTests() launched\n";
     short testNum = 1;
     short* testNumAddress = &testNum;
     int baseArray[] = {1, 2, 3};
