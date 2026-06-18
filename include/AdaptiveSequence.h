@@ -4,6 +4,11 @@
 #include "ArraySequence.h"
 #include "ListSequence.h"
 
+#define RECENT_ACT_COUNT 10
+#define GET_ACTION 1
+#define SET_ACTION -1
+#define DEFAULT_ACTION 0
+
 enum AdaptiveSeqMode {
     ARRAY = 0,
     LIST
@@ -12,7 +17,10 @@ enum AdaptiveSeqMode {
 template <class T> class AdaptiveSequence: public Sequence<T> {
     private:
         Sequence<T>* seq;
-        AdaptiveSeqMode mode;
+        mutable AdaptiveSeqMode mode;
+        mutable short* recentActions;
+        mutable short recentActionCount;
+        mutable short sumActions;
 
         void SwitchToArray() {
             int size = seq->GetLength();
@@ -49,6 +57,12 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
             default:
                 throw ADAPTIVE_SEQ_MODE_ERROR;
             }
+            recentActions = new short[RECENT_ACT_COUNT];
+            for (short index = 0; index < RECENT_ACT_COUNT; index++) {
+                recentActions[index] = DEFAULT_ACTION;
+            }
+            recentActionCount = 0;
+            sumActions = 0;
         }
 
         AdaptiveSequence(AdaptiveSeqMode givenMode) {
@@ -63,6 +77,12 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
             default:
                 throw ADAPTIVE_SEQ_MODE_ERROR;
             }
+            recentActions = new short[RECENT_ACT_COUNT];
+            for (short index = 0; index < RECENT_ACT_COUNT; index++) {
+                recentActions[index] = DEFAULT_ACTION;
+            }
+            recentActionCount = 0;
+            sumActions = 0;
         }
 
         AdaptiveSequence(const AdaptiveSequence<T> &other) {
@@ -77,10 +97,17 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
             default:  // не должно достигаться
                 throw ADAPTIVE_SEQ_MODE_ERROR;
             }
+            recentActions = new short[RECENT_ACT_COUNT];
+            for (short index = 0; index < RECENT_ACT_COUNT; index++) {
+                recentActions[index] = DEFAULT_ACTION;
+            }
+            recentActionCount = 0;
+            sumActions = 0;
         }
 
         ~AdaptiveSequence() {
             delete seq;
+            delete recentActions;
         }
 
         T GetFirst() const override {
@@ -92,10 +119,16 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
         }
 
         T Get(int index) const override {
+            sumActions = sumActions - recentActions[recentActionCount] + GET_ACTION;
+            recentActions[recentActionCount] = GET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
             return seq->Get(index);
         }
 
         AdaptiveSequence<T>* GetSubsequence(int startIndex, int endIndex) const override {
+            sumActions = sumActions - recentActions[recentActionCount] + GET_ACTION;
+            recentActions[recentActionCount] = GET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
             AdaptiveSequence<T>* result = new AdaptiveSequence<T>(mode);
             result->seq = seq->GetSubsequence(startIndex, endIndex);
             return result;
@@ -106,21 +139,36 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
         }
 
         AdaptiveSequence<T>* Append(T item) override {
+            sumActions = sumActions - recentActions[recentActionCount] + SET_ACTION;
+            recentActions[recentActionCount] = SET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
             seq->Append(item);
             return this;
         }
 
         AdaptiveSequence<T>* Prepend(T item) override {
+            sumActions = sumActions - recentActions[recentActionCount] + SET_ACTION;
+            recentActions[recentActionCount] = SET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
             seq->Prepend(item);
             return this;
         }
 
         AdaptiveSequence<T>* InsertAt(T item, int index) override {
+            sumActions = sumActions - recentActions[recentActionCount] + SET_ACTION;
+            recentActions[recentActionCount] = SET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
             seq->InsertAt(item, index);
             return this;
         }
 
         AdaptiveSequence<T>* Concat(Sequence<T>* list) override {
+            sumActions = sumActions - recentActions[recentActionCount] + SET_ACTION;
+            recentActions[recentActionCount] = SET_ACTION;
+            recentActionCount = (recentActionCount + 1) % RECENT_ACT_COUNT;
+            if (sumActions < 0 && mode == ARRAY) {
+                SwitchToList();
+            }
             seq->Concat(list);
             return this;
         }
@@ -151,6 +199,11 @@ template <class T> class AdaptiveSequence: public Sequence<T> {
             } else {
                 SwitchToArray();
             }
+        }
+
+        void AdaptMode() {
+            if (sumActions > 0 && mode == LIST) SwitchToArray();
+            if (sumActions < 0 && mode == ARRAY) SwitchToList();
         }
 };
 

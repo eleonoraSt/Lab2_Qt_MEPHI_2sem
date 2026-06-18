@@ -1,8 +1,6 @@
 #include "..\include\errors.h"
 #include "..\include\BitSequence.h"
 
-#include <iostream>  // отладка
-
 #define BYTE_LEN 8
 
 BitSequence::BitSequence(const bool* bitString, int count) {
@@ -29,7 +27,6 @@ BitSequence::~BitSequence() {
 
 bool BitSequence::GetFirst() const {
     unsigned char mask = 128;
-    std::cout << (short)(seq->Get(0)) << "\n";
     return (bool)(seq->Get(0) & mask);
 }
 
@@ -106,7 +103,6 @@ BitSequence* BitSequence::Prepend(bool item) {
 
 BitSequence* BitSequence::InsertAt(bool item, int index) {
     if (index < 0 || index > length) throw INDEX_ERROR;
-    std::cout << "the error is not here\n";
     if (length % BYTE_LEN == 0) {
         seq->Resize(length / BYTE_LEN + 1);
         seq->Set(length / BYTE_LEN, 0);
@@ -173,6 +169,7 @@ BitSequence* BitSequence::And(const BitSequence &other) const {
     for (int index = 0; index <= (length - 1) / BYTE_LEN; index++) {
         result->seq->Set(index, seq->Get(index) & other.seq->Get(index));
     }
+    result->length = length;
     return result;
 }
 
@@ -183,6 +180,7 @@ BitSequence* BitSequence::Or(const BitSequence &other) const {
     for (int index = 0; index <= (length - 1) / BYTE_LEN; index++) {
         result->seq->Set(index, seq->Get(index) | other.seq->Get(index));
     }
+    result->length = length;
     return result;
 }
 
@@ -193,6 +191,7 @@ BitSequence* BitSequence::Xor(const BitSequence &other) const {
     for (int index = 0; index <= (length - 1) / BYTE_LEN; index++) {
         result->seq->Set(index, seq->Get(index) ^ other.seq->Get(index));
     }
+    result->length = length;
     return result;
 }
 
@@ -202,5 +201,6 @@ BitSequence* BitSequence::Not() const {
     for (int index = 0; index <= (length - 1) / BYTE_LEN; index++) {
         result->seq->Set(index, ~seq->Get(index));
     }
+    result->length = length;
     return result;
 }

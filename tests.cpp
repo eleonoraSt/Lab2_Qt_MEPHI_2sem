@@ -492,7 +492,7 @@ void runAllTests() {
     testInsertAtIndexError(testNumAddress, emptyArray, 1, 1);  //52
 
     testConcat(testNumAddress, intList, intAdaptive);
-    testConcat(testNumAddress, intArray, intAdaptive);  //56
+    testConcat(testNumAddress, intArray, intAdaptive);  //54
 
     // If everything's right, bitSeq is now 0101010
     bool bitMaskArray[] = {false, false, false, true, true, true, true};
@@ -503,11 +503,11 @@ void runAllTests() {
     testAnd(testNumAddress, bitSeq, bitMask);
     testOr(testNumAddress, bitSeq, bitMask);
     testXor(testNumAddress, bitSeq, bitMask);
-    testNot(testNumAddress, bitSeq);
+    testNot(testNumAddress, bitSeq);  //58
 
     testAndIndexError(testNumAddress, bitSeq, bitMaskIndexError);
     testOrIndexError(testNumAddress, bitSeq, bitMaskIndexError);
-    testXorIndexError(testNumAddress, bitSeq, bitMaskIndexError);
+    testXorIndexError(testNumAddress, bitSeq, bitMaskIndexError);  //61
 
     delete bitMask;
     delete bitMaskIndexError;
