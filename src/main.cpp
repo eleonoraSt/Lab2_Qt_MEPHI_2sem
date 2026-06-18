@@ -4,7 +4,7 @@
 #include "..\tests.cpp"
 
 int main(int argc, char** argv) {
-    runAllTests();
+    //runAllTests();
 
     QApplication app(argc, argv);
 

@@ -23,7 +23,15 @@ template <class T> class ArraySequence: public Sequence<T> {
         ArraySequence(const ArraySequence<T> &other) {
             seq = new DynamicArray<T>(*other.seq);
         }
-
+/*
+ * ArraySequence1 - проинициализирован
+ * ArraySequence2 - проинициализирован
+ * ArraySequence2 = ArraySequence1
+ *
+ * Правило 3: нужен конструктор по умолчанию, конструктор, собирающий объект, и конструктор, копирующий объект
+ * Обязательно нужно при этом переопределить оператор присваивания
+ * Правило 5: move-семантика (std::move)
+ */
         ~ArraySequence() {
             delete seq;
         }

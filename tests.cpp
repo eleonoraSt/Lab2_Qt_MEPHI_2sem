@@ -425,24 +425,24 @@ void runAllTests() {
     testGetFirstIndexError<int>(testNumAddress, emptyList);
     testGetFirstIndexError<int>(testNumAddress, emptyArray);
     testGetFirst<int>(testNumAddress, intAdaptive, 1);
-    testGetFirst<bool>(testNumAddress, bitSeq, true);  // 6
+    testGetFirst<bool>(testNumAddress, bitSeq, true);  //6
 
     testGetLast<int>(testNumAddress, intList, 3);
     testGetLast<int>(testNumAddress, intArray, 3);
     testGetLastIndexError<int>(testNumAddress, emptyList);
     testGetLastIndexError<int>(testNumAddress, emptyArray);
     testGetLast<int>(testNumAddress, intAdaptive, 3);
-    testGetLast<bool>(testNumAddress, bitSeq, false);
+    testGetLast<bool>(testNumAddress, bitSeq, false);  //12
 
     testGet<int>(testNumAddress, intList, 2, 1);
     testGet<int>(testNumAddress, intArray, 2, 1);
     testGet<int>(testNumAddress, intAdaptive, 2, 1);
-    testGet<bool>(testNumAddress, bitSeq, false, 1);
+    testGet<bool>(testNumAddress, bitSeq, false, 1);  //16
 
     testGetIndexError(testNumAddress, emptyList, 3);
     testGetIndexError(testNumAddress, emptyArray, 3);
     testGetIndexError(testNumAddress, intAdaptive, 3);
-    testGetIndexError(testNumAddress, bitSeq, 4);
+    testGetIndexError(testNumAddress, bitSeq, 4);  //20
 
     int subseqArray[] = {2, 3};
     bool subseqBoolArray[] = {false, true};
@@ -464,19 +464,19 @@ void runAllTests() {
     testGetSubseqIndexError(testNumAddress, intAdaptive, -1, 2);
     testGetSubseqIndexError(testNumAddress, intAdaptive, 2, 1);
     testGetSubseqIndexError(testNumAddress, bitSeq, -1, 2);
-    testGetSubseqIndexError(testNumAddress, bitSeq, 2, 1);
+    testGetSubseqIndexError(testNumAddress, bitSeq, 2, 1);  //32
 
     testGetLength(testNumAddress, intList, 3);
     testGetLength(testNumAddress, intArray, 3);
     testGetLength(testNumAddress, emptyList, 0);
     testGetLength(testNumAddress, emptyArray, 0);
     testGetLength(testNumAddress, intAdaptive, 3);
-    testGetLength(testNumAddress, bitSeq, 4);
+    testGetLength(testNumAddress, bitSeq, 4);  //38
 
     testAppend(testNumAddress, intList, 5);
     testAppend(testNumAddress, intArray, 5);
     testAppend(testNumAddress, intAdaptive, 5);
-    testAppend(testNumAddress, bitSeq, false);
+    testAppend(testNumAddress, bitSeq, false);  //42
 
     testPrepend(testNumAddress, intList, 0);
     testPrepend(testNumAddress, intArray, 0);
@@ -486,13 +486,13 @@ void runAllTests() {
     testInsertAt(testNumAddress, intList, 4, 4);
     testInsertAt(testNumAddress, intArray, 4, 4);
     testInsertAt(testNumAddress, intAdaptive, 4, 4);
-    testInsertAt(testNumAddress, bitSeq, true, 5);
+    testInsertAt(testNumAddress, bitSeq, true, 5);  //50
 
     testInsertAtIndexError(testNumAddress, emptyList, 1, 1);
-    testInsertAtIndexError(testNumAddress, emptyArray, 1, 1);
+    testInsertAtIndexError(testNumAddress, emptyArray, 1, 1);  //52
 
     testConcat(testNumAddress, intList, intAdaptive);
-    testConcat(testNumAddress, intArray, intAdaptive);
+    testConcat(testNumAddress, intArray, intAdaptive);  //56
 
     // If everything's right, bitSeq is now 0101010
     bool bitMaskArray[] = {false, false, false, true, true, true, true};

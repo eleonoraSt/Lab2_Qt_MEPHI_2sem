@@ -6,7 +6,8 @@
 
 class BitSequence: public Sequence<bool> {
 private:
-    DynamicArray<bool>* seq;
+    DynamicArray<unsigned char>* seq;
+    int length;
 public:
     BitSequence(const bool* bits, int count);
     BitSequence();

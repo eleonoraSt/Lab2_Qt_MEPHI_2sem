@@ -249,7 +249,6 @@ void Window::getButtonClicked() {
         errorMessage->setText("Введите натуральное число");
         return;
     }
-    std::cout << "getting elem number " << index << "\n";
     try {
         if (mode == INT_MODE) {
             getRes = std::to_string(intSeq->Get(index));
